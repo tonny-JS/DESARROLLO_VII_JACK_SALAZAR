@@ -51,9 +51,9 @@ do {
     // Simulamos que el acceso es exitoso en el intento 3
     if ($intento == 3) {
         $acceso = true;
-        echo "Intento $intento: Acceso concedido ✅<br>";
+        echo "Intento $intento: Acceso concedido <br>";
     } else {
-        echo "Intento $intento: Acceso denegado ❌<br>";
+        echo "Intento $intento: Acceso denegado <br>";
     }
 } while (!$acceso && $intento < 5);
 
