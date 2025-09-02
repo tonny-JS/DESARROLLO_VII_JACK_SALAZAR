@@ -77,5 +77,6 @@ print_r($datos);
 arsort($datos);  // Ordena por valor en orden descendente
 echo "Datos ordenados por valor (descendente):</br>";
 print_r($datos);
+
 ?>
       
