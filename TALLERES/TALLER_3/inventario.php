@@ -17,7 +17,7 @@ function ordenarInventario($inventario) {
 }
 
 function mostrarInventario($inventario) {
-    echo "<h2>📦 Resumen del Inventario</h2>";
+    echo "<h2> Resumen del Inventario</h2>";
     echo "<table>";
     echo "<tr><th>Producto</th><th>Precio</th><th>Cantidad</th></tr>";
     foreach ($inventario as $producto) {
@@ -41,7 +41,7 @@ function informeStockBajo($inventario) {
     $stockBajo = array_filter($inventario, function ($producto) {
         return $producto['cantidad'] < 5;
     });
-    echo "<h2>⚠️ Informe de Stock Bajo</h2>";
+    echo "<h2> Informe de Stock Bajo</h2>";
     if (empty($stockBajo)) {
         echo "<p style='color:green;'>No hay productos con stock bajo.</p>";
     } else {
@@ -113,7 +113,7 @@ function informeStockBajo($inventario) {
         mostrarInventario($inventario);
 
         $valorTotal = calcularValorTotal($inventario);
-        echo "<h2>💰 Valor total del inventario: \$" . number_format($valorTotal, 2) . "</h2>";
+        echo "<h2> Valor total del inventario: \$" . number_format($valorTotal, 2) . "</h2>";
 
         informeStockBajo($inventario);
     } else {
