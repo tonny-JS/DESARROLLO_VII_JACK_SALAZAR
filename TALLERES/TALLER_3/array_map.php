@@ -50,8 +50,8 @@ $productosConDescuento = array_map(function($producto) {
 
 echo "</br>Productos con descuento:</br>";
 foreach ($productosConDescuento as $producto) {
-    echo "- {$producto['nombre']}: Precio original: ${$producto['precio']}, ";
-    echo "Precio con descuento: ${$producto['precio_descuento']}</br>";
+    echo "- {$producto['nombre']}: Precio original:\$ {$producto['precio']}, ";
+    echo "Precio con descuento:\$ {$producto['precio_descuento']}</br>";
 }
 
 // Desafío: Crear una función que aplique diferentes operaciones a cada elemento
