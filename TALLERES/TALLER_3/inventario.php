@@ -1,8 +1,4 @@
 <?php
-// ===============================
-// Sistema de Gestión de Inventario
-// Basado en archivo JSON
-// ===============================
 
 // Función para leer el inventario desde el archivo JSON
 function leerInventario($archivo) {
