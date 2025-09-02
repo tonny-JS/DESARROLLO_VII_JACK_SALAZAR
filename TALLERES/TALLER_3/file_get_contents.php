@@ -11,7 +11,7 @@ $contenidoPhp = file_get_contents($nombreArchivo);
 echo "</br>Contenido del archivo $nombreArchivo:</br>$contenidoPhp</br>";
 
 // Bonus: Usa file_get_contents() para obtener el contenido de una página web
-$url = "https://www.example.com";
+$url = "https://dummyjson.com/todos";
 $contenidoWeb = file_get_contents($url);
 echo "</br>Contenido de $url:</br>" . substr($contenidoWeb, 0, 500) . "...</br>"; // Mostramos solo los primeros 500 caracteres
 
