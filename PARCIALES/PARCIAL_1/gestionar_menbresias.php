@@ -2,7 +2,7 @@
 // gestionar_membresias.php
 include 'funciones_gimnasio.php';
 
-// 1. Array asociativo con 5 tipos de membresía y sus precios base
+//Array asociativo con 5 tipos de membresía y sus precios base
 $membresias = [
     'basica' => 80,
     'premium' => 120,
@@ -10,8 +10,7 @@ $membresias = [
     'familiar' => 250,
     'corporativa' => 300
 ];
-
-// 2. Array asociativo con la información de 5 miembros
+// 2. Array asociativo 
 $miembros = [
     'Juan Pérez' => ['tipo' => 'premium', 'antiguedad' => 1],
     'Ana García' => ['tipo' => 'basica', 'antiguedad' => 2],
@@ -25,18 +24,10 @@ foreach ($miembros as $nombre => $info) {
     $tipo = $info['tipo'];
     $antiguedad = $info['antiguedad'];
     $precioBase = $membresias[$tipo];
-    
-    // Calcular descuento
     $porcentajeDescuento = calcularDescuento($antiguedad);
     $montoDescuento = $precioBase * $porcentajeDescuento;
-    
-    // Calcular seguro médico
     $seguroMedico = calcularSeguroMedico($tipo);
-    
-    // Calcular cuota final
     $cuotaFinal = calcularCuotaFinal($info, $membresias);
-    
-    // Almacenar resultados
     $resultados[$nombre] = [
         'tipo' => $tipo,
         'antiguedad' => $antiguedad,
