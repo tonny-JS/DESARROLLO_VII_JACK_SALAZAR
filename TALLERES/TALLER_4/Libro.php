@@ -17,6 +17,10 @@ class Libro implements Prestable {
         return "Título: {$this->titulo}, Autor: {$this->autor}, Año: {$this->anio}";
     }
 
+    public function getTitulo() {
+        return $this->titulo;
+    }
+
     public function prestar() {
         if ($this->disponible) {
             $this->disponible = false;
@@ -33,12 +37,3 @@ class Libro implements Prestable {
         return $this->disponible;
     }
 }
-
-// Ejemplo de uso
-$libro = new Libro("Rayuela", "Julio Cortázar", 1963);
-echo $libro->obtenerInformacion() . "\n";
-echo "Disponible: " . ($libro->estaDisponible() ? "Sí" : "No") . "\n";
-$libro->prestar();
-echo "Disponible después de prestar: " . ($libro->estaDisponible() ? "Sí" : "No") . "\n";
-$libro->devolver();
-echo "Disponible después de devolver: " . ($libro->estaDisponible() ? "Sí" : "No") . "\n";
