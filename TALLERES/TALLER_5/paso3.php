@@ -84,5 +84,4 @@ echo "\nEstudiantes de honor:\n";
 foreach ($honor as $e) {
     echo "- {$e['nombre']} (Promedio: " . number_format($e['promedio'], 2) . ")\n";
 }
-
 ?>
