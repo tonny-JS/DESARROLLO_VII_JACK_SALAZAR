@@ -11,7 +11,7 @@ function sanitizarEdad($edad) {
     return filter_var($edad, FILTER_SANITIZE_NUMBER_INT);
 }
 
-function sanitizarSitio_Web($sitioWeb) {
+function sanitizarSitioWeb($sitioWeb) {
     return filter_var(trim($sitioWeb), FILTER_SANITIZE_URL);
 }
 
