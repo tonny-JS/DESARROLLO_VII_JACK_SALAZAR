@@ -13,13 +13,13 @@
         "id": 2,
         "salarioBase": 2700,
         "departamento": "Operaciones",
-        "bono": 405
+        "bono": 0
     },
     {
         "tipo": "Desarrollador",
         "nombre": "Laura P\u00e9rez",
         "id": 10,
-        "salarioBase": 1650.0000000000002,
+        "salarioBase": 1500,
         "lenguaje": "PHP",
         "nivel": "senior"
     },
@@ -27,7 +27,7 @@
         "tipo": "Desarrollador",
         "nombre": "Miguel Torres",
         "id": 11,
-        "salarioBase": 1320,
+        "salarioBase": 1200,
         "lenguaje": "JavaScript",
         "nivel": "mid"
     },
