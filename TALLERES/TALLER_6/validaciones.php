@@ -29,22 +29,16 @@ function validarComentarios($comentarios) {
     return strlen($comentarios) <= 500;
 }
 
+function validarFechaNacimiento($fecha) {
+    return DateTime::createFromFormat('Y-m-d', $fecha) !== false;
+}
+
 function validarFotoPerfil($archivo) {
     $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
-    $tamanoMaximo = 1 * 1024 * 1024; // 1MB
+    $tamanoMaximo = 1 * 1024 * 1024;
 
-    if ($archivo['error'] !== UPLOAD_ERR_OK) {
-        return false;
-    }
-
-    if (!in_array($archivo['type'], $tiposPermitidos)) {
-        return false;
-    }
-
-    if ($archivo['size'] > $tamanoMaximo) {
-        return false;
-    }
-
-    return true;
+    return $archivo['error'] === UPLOAD_ERR_OK &&
+           in_array($archivo['type'], $tiposPermitidos) &&
+           $archivo['size'] <= $tamanoMaximo;
 }
 ?>
