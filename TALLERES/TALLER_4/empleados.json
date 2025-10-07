@@ -19,7 +19,7 @@
         "tipo": "Desarrollador",
         "nombre": "Laura P\u00e9rez",
         "id": 10,
-        "salarioBase": 1500,
+        "salarioBase": 1650.0000000000002,
         "lenguaje": "PHP",
         "nivel": "senior"
     },
