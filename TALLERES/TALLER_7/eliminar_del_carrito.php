@@ -6,4 +6,3 @@ if ($id && isset($_SESSION['carrito'][$id])) {
 }
 header("Location: ver_carrito.php");
 exit();
-?>

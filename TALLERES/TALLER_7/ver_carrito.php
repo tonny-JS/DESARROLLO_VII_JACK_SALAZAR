@@ -9,9 +9,9 @@ $total = 0;
 if (!empty($_SESSION['carrito'])) {
     echo "<ul>";
     foreach ($_SESSION['carrito'] as $id => $item) {
-        $nombre = htmlspecialchars($item['producto']['nombre']);
-        $precio = $item['producto']['precio'];
-        $cantidad = $item['cantidad'];
+        $nombre = isset($item['nombre']) ? htmlspecialchars($item['nombre']) : 'Producto';
+        $precio = $item['precio'] ?? 0;
+        $cantidad = $item['cantidad'] ?? 0;
         $subtotal = $precio * $cantidad;
         $total += $subtotal;
         echo "<li>$nombre - $cantidad x $$precio = $$subtotal 

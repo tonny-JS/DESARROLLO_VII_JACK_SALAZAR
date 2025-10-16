@@ -1,8 +1,8 @@
 <?php
-// Configuración segura de sesiones
+// Seguridad básica de sesión
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 1); // Solo si usas HTTPS
+ini_set('session.cookie_secure', 0); // Usa 1 si estás en HTTPS
 
 session_start();
 

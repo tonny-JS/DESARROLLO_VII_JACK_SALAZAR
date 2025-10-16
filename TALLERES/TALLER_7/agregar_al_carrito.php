@@ -1,22 +1,30 @@
 <?php include 'config_sesion.php';
 
-$productos = [
-    1 => ['nombre' => 'Laptop', 'precio' => 800],
-    2 => ['nombre' => 'Mouse', 'precio' => 20],
-    3 => ['nombre' => 'Teclado', 'precio' => 35],
-    4 => ['nombre' => 'Monitor', 'precio' => 150],
-    5 => ['nombre' => 'USB', 'precio' => 10]
-];
+$productos = json_decode(file_get_contents('productos.json'), true);
+$cantidades = $_POST['cantidades'] ?? [];
 
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-if ($id && isset($productos[$id])) {
-    if (!isset($_SESSION['carrito'])) $_SESSION['carrito'] = [];
-    if (!isset($_SESSION['carrito'][$id])) {
-        $_SESSION['carrito'][$id] = ['producto' => $productos[$id], 'cantidad' => 1];
-    } else {
-        $_SESSION['carrito'][$id]['cantidad']++;
+if (!isset($_SESSION['carrito'])) $_SESSION['carrito'] = [];
+
+foreach ($cantidades as $id => $cantidad) {
+    $id = (int)$id;
+    $cantidad = (int)$cantidad;
+
+    if ($cantidad > 0) {
+        foreach ($productos as $producto) {
+            if ($producto['id'] === $id) {
+                if (!isset($_SESSION['carrito'][$id])) {
+                    $_SESSION['carrito'][$id] = [
+                        'nombre' => $producto['nombre'],
+                        'precio' => $producto['precio'],
+                        'cantidad' => $cantidad
+                    ];
+                } else {
+                    $_SESSION['carrito'][$id]['cantidad'] += $cantidad;
+                }
+                break;
+            }
+        }
     }
 }
 header("Location: ver_carrito.php");
 exit();
-?>
