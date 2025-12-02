@@ -1,5 +1,6 @@
 <?php
 include "database.php";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = trim($_POST["nombre"]);
     $categoria = trim($_POST["categoria"]);
@@ -8,8 +9,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($nombre != "" && $categoria != "" && is_numeric($precio) && is_numeric($cantidad)) {
         $sql = "INSERT INTO productos (nombre, categoria, precio, cantidad) VALUES (?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$nombre, $categoria, $precio, $cantidad]);
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssdi", $nombre, $categoria, $precio, $cantidad);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
         header("Location: index.php");
         exit;
     }
@@ -21,10 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <h1>Registrar Producto</h1>
 <form method="post">
-    Nombre: <input type="text" name="nombre"><br>
-    Categoría: <input type="text" name="categoria"><br>
-    Precio: <input type="number" step="0.01" name="precio"><br>
-    Cantidad: <input type="number" name="cantidad"><br>
+    Nombre: <input type="text" name="nombre" required><br>
+    Categoría: <input type="text" name="categoria" required><br>
+    Precio: <input type="number" step="0.01" name="precio" required><br>
+    Cantidad: <input type="number" name="cantidad" required><br>
     <button type="submit">Guardar</button>
 </form>
 </body>
