@@ -1,12 +1,13 @@
 <?php
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '90335177');
-define('DB_NAME', 'taller9_db');
+$host = "localhost";
+$user = "root";
+$pass = "90335177";
+$dbname = "techparts_db";
 
-$conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
-
-if ($conn === false) {
-    die("ERROR: No se pudo conectar. " . mysqli_connect_error());
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Error de conexión: " . $e->getMessage());
 }
 ?>
