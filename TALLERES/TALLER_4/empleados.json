@@ -5,7 +5,7 @@
         "id": 1,
         "salarioBase": 2500,
         "departamento": "Ventas",
-        "bono": 0
+        "bono": 375
     },
     {
         "tipo": "Gerente",
