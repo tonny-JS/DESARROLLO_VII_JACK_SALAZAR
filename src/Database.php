@@ -1,31 +1,20 @@
 <?php
 class Database {
-    // Instancia única de la clase (patrón Singleton)
-    private static $instance = null;
-    // Conexión PDO
-    private $conn;
-
-    // Constructor privado para prevenir la creación directa de objetos
-    private function __construct() {
-        // Creamos la conexión PDO
-        $this->conn = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME,
-            DB_USER,
-            DB_PASS,
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
-    }
-
-    // Método para obtener la instancia única de la clase
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
+    private $pdo = null;
+    public function __construct(){
+        $cfg = require __DIR__ . '/../config.php';
+        $db = $cfg['db'];
+        $dsn = "mysql:host={$db['host']};dbname={$db['name']};charset={$db['charset']}";
+        try {
+            $this->pdo = new PDO($dsn, $db['user'], $db['pass'], [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]);
+        } catch (PDOException $e) {
+            echo 'DB Connection failed: ' . $e->getMessage();
+            exit;
         }
-        return self::$instance;
     }
-
-    // Método para obtener la conexión PDO
-    public function getConnection() {
-        return $this->conn;
-    }
+    public function pdo(){ return $this->pdo; }
 }
+?>

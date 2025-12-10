@@ -7,6 +7,10 @@ body {
     background-color: #f4f4f4;
 }
 
+main {
+    padding: 20px;
+}
+
 .container {
     width: 80%;
     margin: auto;
@@ -14,23 +18,36 @@ body {
     padding: 20px;
 }
 
-/* Estilos del encabezado */
+/* Encabezado */
 header {
     background: #333;
     color: #fff;
-    padding-top: 30px;
-    min-height: 70px;
-    border-bottom: #bbb 3px solid;
+    padding: 20px 0;
+    border-bottom: 3px solid #bbb;
+    text-align: center;
 }
 
 header h1 {
-    text-align: center;
     margin: 0;
-    padding-bottom: 20px;
+    font-size: 24px;
 }
 
-/* Estilos de la lista de tareas */
-.task-list {
+nav {
+    margin-top: 10px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Lista de eventos */
+.event-list {
     background: #fff;
     padding: 20px;
     margin-top: 20px;
@@ -38,44 +55,59 @@ header h1 {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.task-list ul {
-    list-style-type: none;
-    padding: 0;
+.event-item {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border-left: 5px solid #333;
 }
 
-.task-list li {
-    background: #f4f4f4;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 3px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.event-item.published {
+    border-left-color: green;
 }
 
-.task-list li.completed {
-    text-decoration: line-through;
-    color: #888;
+.event-item h3 {
+    margin-top: 0;
 }
 
-/* Estilos de botones */
+/* Botones */
 .btn {
     display: inline-block;
     background: #333;
     color: #fff;
-    padding: 10px 15px;
+    padding: 8px 12px;
     border: none;
     cursor: pointer;
     text-decoration: none;
     border-radius: 3px;
+    margin-right: 5px;
 }
 
 .btn:hover {
     background: #555;
 }
 
-/* Estilos del formulario */
-.task-form {
+.btn-toggle-event {
+    background-color: #007bff;
+}
+
+.btn-toggle-event:hover {
+    background-color: #0056b3;
+}
+
+.btn-delete-event {
+    background-color: #dc3545;
+}
+
+.btn-delete-event:hover {
+    background-color: #a71d2a;
+}
+
+/* Formularios */
+.event-form,
+.register-form,
+.login-form {
     background: #fff;
     padding: 20px;
     margin-top: 20px;
@@ -83,19 +115,23 @@ header h1 {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.task-form input[type="text"] {
+.event-form input,
+.event-form textarea,
+.event-form select,
+.register-form input,
+.login-form input {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }
 
-/* Estilos del pie de página */
+/* Pie de página */
 footer {
     background: #333;
     color: #fff;
     text-align: center;
     padding: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+    margin-top: 40px;
 }

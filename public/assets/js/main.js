@@ -1,41 +1,43 @@
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', function() {
-    // Seleccionar todos los botones de eliminar
-    var deleteButtons = document.querySelectorAll('.btn-delete');
-    
-    // Añadir un event listener a cada botón de eliminar
-    deleteButtons.forEach(function(button) {
+    // --- Eliminar eventos ---
+    var deleteEventButtons = document.querySelectorAll('.btn-delete-event');
+    deleteEventButtons.forEach(function(button) {
         button.addEventListener('click', function(e) {
-            // Prevenir el comportamiento predeterminado del enlace
             e.preventDefault();
-            
-            // Mostrar un cuadro de diálogo de confirmación
-            if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-                // Si el usuario confirma, redirigir a la URL de eliminación
+            if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
                 window.location.href = this.href;
             }
         });
     });
 
-    // Seleccionar todos los botones de alternar
-    var toggleButtons = document.querySelectorAll('.btn-toggle');
-    
-    // Añadir un event listener a cada botón de alternar
-    toggleButtons.forEach(function(button) {
+    // --- Alternar estado de eventos (publicado/borrador) ---
+    var toggleEventButtons = document.querySelectorAll('.btn-toggle-event');
+    toggleEventButtons.forEach(function(button) {
         button.addEventListener('click', function(e) {
-            // Prevenir el comportamiento predeterminado del enlace
             e.preventDefault();
-            
-            // Enviar una solicitud AJAX para alternar el estado de la tarea
             fetch(this.href)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Si la operación fue exitosa, alternar la clase 'completed' en el elemento li padre
-                        this.closest('li').classList.toggle('completed');
+                        // Alternar clase 'published' en el artículo del evento
+                        this.closest('article').classList.toggle('published');
+                        // Actualizar texto del botón según estado
+                        this.textContent = data.newStatus === 'published' ? '✓ Publicado' : '○ Borrador';
                     }
                 })
                 .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // --- Eliminar inscripciones ---
+    var deleteRegistrationButtons = document.querySelectorAll('.btn-delete-registration');
+    deleteRegistrationButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('¿Eliminar esta inscripción?')) {
+                window.location.href = this.href;
+            }
         });
     });
 });
