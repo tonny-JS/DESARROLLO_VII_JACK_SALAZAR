@@ -126,7 +126,7 @@ switch ($action) {
     |--------------------------------------------------------------------------
     */
     case 'cancel_registration':
-        require_login(); 
+        require_login();
 
         $regId = intval($_GET['id'] ?? 0);
         $uid   = userId();
@@ -136,7 +136,6 @@ switch ($action) {
             exit;
         }
 
-        // Verificar que pertenece al usuario
         $stmt = $db->prepare("
             SELECT id, status 
             FROM registrations 
@@ -156,7 +155,6 @@ switch ($action) {
             exit;
         }
 
-        // Cancelar
         $upd = $db->prepare("
             UPDATE registrations
             SET status = 'cancelled'
@@ -166,6 +164,35 @@ switch ($action) {
 
         header("Location: ".BASE_URL."/index.php?view=my_registrations");
         exit;
+}
+
+
+
+// ===================================================================
+//   CARGA DE DATOS PARA LAS VISTAS (AQUÍ ESTABA TU FALTA IMPORTANTE)
+// ===================================================================
+
+if ($view === 'events') {
+
+    // Cargar eventos publicados
+    $stmt = $db->query("
+        SELECT id, title, start_date, end_date
+        FROM events
+        WHERE status = 'published'
+        ORDER BY start_date ASC
+    ");
+    $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Cargar la cantidad de tickets disponibles por evento
+    foreach ($events as &$e) {
+        $stmt2 = $db->prepare("
+            SELECT SUM(quantity)
+            FROM tickets
+            WHERE event_id = :id
+        ");
+        $stmt2->execute([':id' => $e['id']]);
+        $e['tickets_available'] = (int)$stmt2->fetchColumn();
+    }
 }
 
 
