@@ -8,148 +8,132 @@ date_default_timezone_set('America/Panama');
 define('BASE_PATH', __DIR__ . '/');
 session_start();
 
-// Configuración y clases
+// --- Configuración ---
 $cfg = require BASE_PATH . 'config.php';
-define('BASE_URL', $cfg['base_url'] ?? '');
+define('BASE_URL', $cfg['base_url'] ?? 'http://localhost/DESARROLLO_VII_JACK_SALAZAR/PROYECTO');
 
+// --- Clases ---
 require_once BASE_PATH . 'src/Database.php';
 require_once BASE_PATH . 'src/Event.php';
 require_once BASE_PATH . 'src/EventManager.php';
 require_once BASE_PATH . 'src/User.php';
 require_once BASE_PATH . 'src/AuthManager.php';
-// Nuevos modelos
 require_once BASE_PATH . 'src/Ticket.php';
 require_once BASE_PATH . 'src/Registration.php';
 require_once BASE_PATH . 'src/Access.php';
 
-// Instancias
-$eventManager = new EventManager();
-$authManager  = new AuthManager();
-$event        = new Event();
-$ticket       = new Ticket();
-$registration = new Registration();
+// --- Instancias ---
+$db            = new Database();
+$pdo           = $db->pdo();
+$eventManager  = new EventManager();
+$authManager   = new AuthManager();
+$event         = new Event();
+$ticket        = new Ticket();
+$registration  = new Registration();
 
 $action = $_GET['action'] ?? null;
-$view   = $_GET['view'] ?? 'events';
+$view   = $_GET['view'] ?? 'home';
+$error  = null;
 
-// Helpers de auth
+// =============== Helpers ===============
 function requireLogin() {
-  if (empty($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '?view=login');
-    exit;
-  }
+    if (empty($_SESSION['user'])) {
+        header('Location: ' . BASE_URL . '/index.php?view=login');
+        exit;
+    }
 }
+
 function requireOrganizer() {
-  requireLogin();
-  $db = (new Database())->pdo();
-  $stmt = $db->prepare('SELECT * FROM organizers WHERE user_id=:uid LIMIT 1');
-  $stmt->execute([':uid' => $_SESSION['user']['id']]);
-  $org = $stmt->fetch();
-  if (!$org) {
-    header('Location: ' . BASE_URL . '?view=events&error=not_organizer');
-    exit;
-  }
-  return $org['id'];
+    requireLogin();
+    global $pdo;
+    $stmt = $pdo->prepare('SELECT id FROM organizers WHERE user_id=:uid LIMIT 1');
+    $stmt->execute([':uid' => $_SESSION['user']['id']]);
+    $org = $stmt->fetch();
+    if (!$org) {
+        header('Location: ' . BASE_URL . '/index.php?view=events&error=not_organizer');
+        exit;
+    }
+    return $org['id'];
 }
 
-// Manejo de acciones
+function render_view(string $view_file, array $vars = []) {
+    extract($vars);
+    ob_start();
+    require BASE_PATH . 'views/' . $view_file . '.php';
+    $content = ob_get_clean();
+    require BASE_PATH . 'views/layout.php';
+}
+
+// =============== Acciones ===============
 switch ($action) {
-  case 'store_event':
-    $organizer_id = requireOrganizer();
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $eventManager->createFromPost($_POST);
-      header('Location: ' . BASE_URL . '?view=events');
-      exit;
-    }
-    break;
+    case 'do_login':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $u = $authManager->login(trim($_POST['email']), $_POST['password']);
+            if ($u) {
+                $_SESSION['user'] = $u;
+                header('Location: ' . BASE_URL . '/index.php?view=events');
+                exit;
+            }
+            $error = 'Credenciales inválidas';
+            render_view('login', ['error' => $error]);
+        }
+        break;
 
-  case 'do_login':
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $u = $authManager->login($_POST['email'], $_POST['password']);
-      if ($u) {
-        $_SESSION['user'] = $u;
-        header('Location: ' . BASE_URL . '?view=events');
+    case 'do_register':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $role_id = (!empty($_POST['is_organizer']) && $_POST['is_organizer'] == 1) ? 2 : 3;
+            $uid = $authManager->register([
+                'name'     => trim($_POST['name']),
+                'email'    => trim($_POST['email']),
+                'password' => $_POST['password'],
+                'role_id'  => $role_id
+            ]);
+
+            if ($role_id == 2) {
+                $stmt = $pdo->prepare('INSERT INTO organizers (user_id, organization_name, contact_phone) VALUES (:u, NULL, NULL)');
+                $stmt->execute([':u' => $uid]);
+            }
+
+            $_SESSION['user'] = (new User())->find($uid);
+            header('Location: ' . BASE_URL . '/index.php?view=events');
+            exit;
+        }
+        break;
+
+    case 'logout':
+        $_SESSION = [];
+        session_destroy();
+        header('Location: ' . BASE_URL . '/index.php?view=events');
         exit;
-      }
-      $error = 'Credenciales inválidas';
-      require BASE_PATH . 'views/login.php';
-    }
-    break;
 
-  case 'do_register':
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $role_id = (isset($_POST['is_organizer']) && $_POST['is_organizer'] == 1) ? 2 : 3;
-      $uid = $authManager->register([
-        'name'     => $_POST['name'],
-        'email'    => $_POST['email'],
-        'password' => $_POST['password'],
-        'role_id'  => $role_id
-      ]);
-      if ($role_id == 2) {
-        $db = (new Database())->pdo();
-        $stmt = $db->prepare('INSERT INTO organizers (user_id,organization_name,contact_phone) VALUES (:u,:org,:phone)');
-        $stmt->execute([':u' => $uid, ':org' => NULL, ':phone' => NULL]);
-      }
-      $_SESSION['user'] = (new User())->find($uid);
-      header('Location: ' . BASE_URL . '?view=events');
-      exit;
-    }
-    break;
-
-  case 'logout':
-    session_destroy();
-    header('Location: ' . BASE_URL . '?view=events');
-    exit;
-
-  case 'toggle_event':
-    $organizer_id = requireOrganizer();
-    if (!empty($_GET['id'])) {
-      $db = (new Database())->pdo();
-      $stmt = $db->prepare("SELECT status FROM events WHERE id=:id");
-      $stmt->execute([':id' => $_GET['id']]);
-      $ev = $stmt->fetch();
-      if ($ev) {
-        $newStatus = ($ev['status'] === 'published') ? 'draft' : 'published';
-        $update = $db->prepare("UPDATE events SET status=:status WHERE id=:id");
-        $update->execute([':status' => $newStatus, ':id' => $_GET['id']]);
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'newStatus' => $newStatus]);
-        exit;
-      }
-    }
-    break;
-
-  case 'delete_event':
-    $organizer_id = requireOrganizer();
-    if (!empty($_GET['id'])) {
-      $db = (new Database())->pdo();
-      $stmt = $db->prepare("DELETE FROM events WHERE id=:id");
-      $stmt->execute([':id' => $_GET['id']]);
-      header('Location: ' . BASE_URL . '?view=events');
-      exit;
-    }
-    break;
-
-  // Tickets, Registrations y Access → igual que tu versión (ya están correctos)
-  // ...
+    // --- Aquí van tus otras acciones como store_event, delete_event, etc ---
 }
 
-// Manejo de vistas
+// --- Si no hay acción, renderizar la vista ---
 switch ($view) {
-  case 'login':
-    require BASE_PATH . 'views/login.php';
-    break;
-  case 'register':
-    require BASE_PATH . 'views/register.php';
-    break;
-  case 'create_event':
-    $organizer_id = requireOrganizer();
-    require BASE_PATH . 'views/event_form.php';
-    break;
-  case 'events':
-  default:
-    $events = $event->allPublished();
-    require BASE_PATH . 'views/event_list.php';
-    break;
-  // resto de vistas igual que tu versión
+    case 'events':
+        render_view('events');
+        break;
+    case 'login':
+        render_view('login', ['error' => $error]);
+        break;
+    case 'register':
+        render_view('register');
+        break;
+    case 'my_registrations':
+        requireLogin();
+        render_view('my_registrations');
+        break;
+    case 'create_event':
+        $organizer_id = requireOrganizer();
+        render_view('create_event');
+        break;
+    case 'organizer_dashboard':
+        $organizer_id = requireOrganizer();
+        render_view('organizer_dashboard');
+        break;
+    default:
+        render_view('home');
+        break;
 }
+?>
