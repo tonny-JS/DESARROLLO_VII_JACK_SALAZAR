@@ -10,6 +10,7 @@ return [
     'charset' => 'utf8mb4'
   ],
   // Si tienes la variable de entorno BASE_URL la usará, si no, usa la ruta local
-  'base_url' => getenv('BASE_URL') ?: 'http://localhost/proyecto'
+  'base_url' => getenv('BASE_URL') ?: 'http://localhost/DESARROLLO_VII_JACK_SALAZAR/PROYECTO/
+'
 ];
 ?>
