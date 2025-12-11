@@ -1,25 +1,15 @@
-<!-- views/home.php -->
-<div class="home">
-  <h2>Bienvenido a la Plataforma de Gestión de Eventos</h2>
-  <p>
-    Esta es la página de inicio de tu aplicación. 
-    Desde aquí podrás navegar a la sección de <strong>Eventos</strong>, 
-    registrarte como usuario u organizador, y gestionar tus inscripciones.
-  </p>
+<?php
+// Inicia el buffer de salida
+ob_start();
+?>
 
-  <section class="intro">
-    <h3>¿Qué puedes hacer aquí?</h3>
-    <ul>
-      <li>Explorar eventos disponibles.</li>
-      <li>Registrarte y administrar tus inscripciones.</li>
-      <li>Si eres organizador, crear y gestionar tus propios eventos.</li>
-    </ul>
-  </section>
+<h1>Bienvenido a la Plataforma de Eventos</h1>
+<p>Explora los eventos disponibles.</p>
 
-  <section class="cta">
-    <p>
-      Usa el menú superior para comenzar. 
-      Si aún no tienes cuenta, selecciona <em>Registrarse</em>.
-    </p>
-  </section>
-</div>
+<?php
+// Captura el contenido generado y lo guarda en la variable $content
+$content = ob_get_clean();
+
+// Incluye el layout principal
+require __DIR__ . '/layout.php';
+

@@ -1,32 +1,39 @@
-<?php 
-// Iniciamos el buffer de salida
-ob_start(); 
-?>
-<div class="login-form">
-    <h2>Iniciar sesión</h2>
-
-    <form method="post" action="index.php?action=do_login">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" placeholder="Email" required><br>
-
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" placeholder="Contraseña" required><br>
-
-        <?php if (!empty($error)): ?>
-            <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
-        <?php endif; ?>
-
-        <button class="btn" type="submit">Entrar</button>
-    </form>
-
-    <p>¿No tienes cuenta? 
-        <a href="index.php?view=register" class="btn">Regístrate</a>
-    </p>
-</div>
 <?php
-// Guardamos el contenido del buffer en la variable $content
-$content = ob_get_clean();
+// Inicia el buffer de salida
+ob_start();
 
-// Incluimos el layout principal
-require 'views/layout.php';
+// Genera token CSRF
+$csrf = generate_csrf();
 ?>
+
+<h3>Iniciar sesión</h3>
+
+<?php if (!empty($error)): ?>
+    <p style="color:#b00"><?= e($error) ?></p>
+<?php endif; ?>
+
+<form method="post" action="<?= e(BASE_URL) ?>/index.php?action=do_login">
+    <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+
+    <label>
+        Email:<br>
+        <input type="email" name="email" required>
+    </label><br>
+
+    <label>
+        Contraseña:<br>
+        <input type="password" name="password" required>
+    </label><br>
+
+    <button type="submit">Entrar</button>
+</form>
+
+<p>
+    ¿No tienes cuenta? 
+    <a href="<?= e(BASE_URL) ?>/index.php?view=register">Regístrate</a>
+</p>
+
+<?php
+// Captura el contenido y lo pasa al layout
+$content = ob_get_clean();
+require __DIR__ . '/layout.php';

@@ -1,47 +1,44 @@
-<?php 
-// Iniciamos el buffer de salida
-ob_start(); 
-?>
-<h2>Eventos publicados</h2>
+<?php
+// Consulta de eventos publicados
+$stmt = $db->prepare(
+    'SELECT e.*, o.user_id AS owner_user_id 
+     FROM events e 
+     JOIN organizers o ON o.id = e.organizer_id 
+     WHERE e.status = "published" 
+     ORDER BY e.start_at DESC'
+);
+$stmt->execute();
 
-<?php if (!empty($_SESSION['user'])): ?>
-  <?php
-    $db = (new Database())->pdo();
-    $stmt = $db->prepare('SELECT id FROM organizers WHERE user_id=:uid LIMIT 1');
-    $stmt->execute([':uid' => $_SESSION['user']['id']]);
-    $org = $stmt->fetch();
-  ?>
-  <?php if ($org): ?>
-    <p><a href="index.php?view=create_event" class="btn">Crear nuevo evento</a></p>
-  <?php endif; ?>
+// Obtener todos los eventos
+$events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Inicia el buffer de salida
+ob_start();
+?>
+<h2>Eventos</h2>
+
+<?php if (empty($events)): ?>
+    <p>No hay eventos publicados.</p>
+<?php else: ?>
+    <?php foreach ($events as $ev): ?>
+        <article style="border-bottom:1px solid #eee; padding:10px 0;">
+            <h3><?= e($ev['title']) ?></h3>
+            <p><?= e($ev['description']) ?></p>
+            <p>
+                Inicio: <?= e($ev['start_at']) ?> — 
+                Fin: <?= e($ev['end_at']) ?>
+            </p>
+            <p>
+                <a href="<?= e(BASE_URL) ?>/index.php?view=registration&event_id=<?= intval($ev['id']) ?>">
+                    Inscribirme
+                </a>
+            </p>
+        </article>
+    <?php endforeach; ?>
 <?php endif; ?>
 
-<div class="event-list">
-  <?php if (!empty($events)): foreach ($events as $e): ?>
-    <article class="event-item <?php echo ($e['status']==='published')?'published':''; ?>">
-      <h3><?php echo htmlspecialchars($e['title']); ?></h3>
-      <p><strong>Inicio:</strong> <?php echo htmlspecialchars($e['start_datetime']); ?></p>
-      <p><strong>Lugar:</strong> <?php echo htmlspecialchars($e['venue_name'] ?? 'Sin sede'); ?></p>
-      <p><strong>Precio base:</strong> $<?php echo number_format($e['price'],2); ?></p>
-
-      <a href="index.php?view=register_event&event_id=<?php echo $e['id']; ?>" class="btn">Inscribirme</a>
-
-      <?php if (!empty($org)): ?>
-        <a href="index.php?view=tickets&event_id=<?php echo $e['id']; ?>" class="btn">Tickets</a>
-        <a href="index.php?action=toggle_event&id=<?php echo $e['id']; ?>" class="btn btn-toggle-event">
-          <?php echo $e['status']==='published' ? '✓ Publicado' : '○ Borrador'; ?>
-        </a>
-        <a href="index.php?action=delete_event&id=<?php echo $e['id']; ?>" class="btn btn-delete-event">🗑 Eliminar</a>
-      <?php endif; ?>
-    </article>
-  <?php endforeach; else: ?>
-    <p>No hay eventos publicados.</p>
-  <?php endif; ?>
-</div>
 <?php
-// Guardamos el contenido del buffer en la variable $content
+// Captura el contenido y lo pasa al layout
 $content = ob_get_clean();
-
-// Incluimos el layout principal
-require 'views/layout.php';
+require __DIR__ . '/layout.php';
 ?>
