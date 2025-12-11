@@ -1,8 +1,0 @@
-CREATE TABLE IF NOT EXISTS organizers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  organization_name VARCHAR(200),
-  contact_phone VARCHAR(30),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
