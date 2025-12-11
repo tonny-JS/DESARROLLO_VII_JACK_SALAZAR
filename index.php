@@ -9,6 +9,11 @@ $action = $_GET['action'] ?? null;
 $view   = $_GET['view'] ?? 'home';
 $error  = null;
 
+/*
+|--------------------------------------------------------------------------
+| 1. ACCIONES
+|--------------------------------------------------------------------------
+*/
 switch ($action) {
 
     /*
@@ -18,17 +23,18 @@ switch ($action) {
     */
     case 'do_login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             csrf_check($_POST['csrf'] ?? null);
 
             $email = trim($_POST['email'] ?? '');
             $pass  = $_POST['password'] ?? '';
 
-            $stmt = $db->prepare(
-                'SELECT id, name, email, password_hash 
-                 FROM users 
-                 WHERE email = :email 
-                 LIMIT 1'
-            );
+            $stmt = $db->prepare("
+                SELECT id, name, email, password_hash
+                FROM users
+                WHERE email = :email
+                LIMIT 1
+            ");
             $stmt->execute([':email' => $email]);
             $u = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -48,7 +54,6 @@ switch ($action) {
         }
         break;
 
-
     /*
     |--------------------------------------------------------------------------
     | REGISTRO
@@ -56,6 +61,7 @@ switch ($action) {
     */
     case 'do_register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             csrf_check($_POST['csrf'] ?? null);
 
             $name  = trim($_POST['name'] ?? '');
@@ -69,7 +75,7 @@ switch ($action) {
                 exit;
             }
 
-            $exists = $db->prepare('SELECT 1 FROM users WHERE email = :e');
+            $exists = $db->prepare("SELECT 1 FROM users WHERE email = :e");
             $exists->execute([':e' => $email]);
 
             if ($exists->fetchColumn()) {
@@ -81,16 +87,16 @@ switch ($action) {
             $hash = password_hash($pass, PASSWORD_DEFAULT);
             $db->beginTransaction();
 
-            $ins = $db->prepare(
-                'INSERT INTO users (name, email, password_hash) 
-                 VALUES (:n, :e, :h)'
-            );
+            $ins = $db->prepare("
+                INSERT INTO users (name, email, password_hash)
+                VALUES (:n, :e, :h)
+            ");
             $ins->execute([':n' => $name, ':e' => $email, ':h' => $hash]);
 
             $uid = (int)$db->lastInsertId();
 
             if ($isOrg) {
-                $org = $db->prepare('INSERT INTO organizers (user_id) VALUES (:uid)');
+                $org = $db->prepare("INSERT INTO organizers (user_id) VALUES (:uid)");
                 $org->execute([':uid' => $uid]);
             }
 
@@ -107,7 +113,6 @@ switch ($action) {
         }
         break;
 
-
     /*
     |--------------------------------------------------------------------------
     | LOGOUT
@@ -116,9 +121,8 @@ switch ($action) {
     case 'logout':
         $_SESSION = [];
         session_destroy();
-        header('Location: ' . BASE_URL . '/index.php');
+        header("Location: ".BASE_URL."/index.php");
         exit;
-
 
     /*
     |--------------------------------------------------------------------------
@@ -137,8 +141,8 @@ switch ($action) {
         }
 
         $stmt = $db->prepare("
-            SELECT id, status 
-            FROM registrations 
+            SELECT id, status
+            FROM registrations
             WHERE id = :id AND user_id = :uid
             LIMIT 1
         ");
@@ -150,17 +154,14 @@ switch ($action) {
             exit;
         }
 
-        if ($reg['status'] === 'cancelled') {
-            header("Location: ".BASE_URL."/index.php?view=my_registrations");
-            exit;
+        if ($reg['status'] !== 'cancelled') {
+            $upd = $db->prepare("
+                UPDATE registrations
+                SET status = 'cancelled'
+                WHERE id = :id
+            ");
+            $upd->execute([':id' => $regId]);
         }
-
-        $upd = $db->prepare("
-            UPDATE registrations
-            SET status = 'cancelled'
-            WHERE id = :id
-        ");
-        $upd->execute([':id' => $regId]);
 
         header("Location: ".BASE_URL."/index.php?view=my_registrations");
         exit;
@@ -168,39 +169,42 @@ switch ($action) {
 
 
 
-// ===================================================================
-//   CARGA DE DATOS PARA LAS VISTAS (AQUÍ ESTABA TU FALTA IMPORTANTE)
-// ===================================================================
+/*
+|--------------------------------------------------------------------------
+| 2. Cargar datos para vistas dinámicas
+|--------------------------------------------------------------------------
+*/
 
 if ($view === 'events') {
 
-    // Cargar eventos publicados
     $stmt = $db->query("
-        SELECT id, title, start_date, end_date
+        SELECT id, title, start_datetime, end_datetime, capacity, price
         FROM events
         WHERE status = 'published'
-        ORDER BY start_date ASC
+        ORDER BY start_datetime ASC
     ");
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Cargar la cantidad de tickets disponibles por evento
     foreach ($events as &$e) {
-        $stmt2 = $db->prepare("
-            SELECT SUM(quantity)
-            FROM tickets
-            WHERE event_id = :id
+        $q = $db->prepare("
+            SELECT COUNT(*)
+            FROM registrations
+            WHERE event_id = :id AND status = 'active'
         ");
-        $stmt2->execute([':id' => $e['id']]);
-        $e['tickets_available'] = (int)$stmt2->fetchColumn();
+        $q->execute([':id' => $e['id']]);
+
+        $registrados = (int)$q->fetchColumn();
+        $e['tickets_available'] = max(0, $e['capacity'] - $registrados);
     }
 }
 
 
 
-// =======================
-//   CARGADOR DE VISTAS
-// =======================
-
+/*
+|--------------------------------------------------------------------------
+| 3. Cargar vista solicitada
+|--------------------------------------------------------------------------
+*/
 $viewFile = __DIR__ . '/views/' . $view . '.php';
 
 if (file_exists($viewFile)) {
