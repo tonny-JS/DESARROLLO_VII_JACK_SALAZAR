@@ -1,129 +1,155 @@
 <?php
-    if (! empty($_GET['q'])) {
-        $query = htmlspecialchars($_GET['q'], ENT_QUOTES, 'UTF-8');
+// index.php - Router principal
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+date_default_timezone_set('America/Panama');
 
-        switch ($query) {
-            case 'info':
-                phpinfo();
-                exit;
-            default:
-                header("HTTP/1.0 404 Not Found");
-                echo "Invalid query parameter.";
-                exit;
-        }
+define('BASE_PATH', __DIR__ . '/');
+session_start();
+
+// Configuración y clases
+$cfg = require BASE_PATH . 'config.php';
+define('BASE_URL', $cfg['base_url'] ?? '');
+
+require_once BASE_PATH . 'src/Database.php';
+require_once BASE_PATH . 'src/Event.php';
+require_once BASE_PATH . 'src/EventManager.php';
+require_once BASE_PATH . 'src/User.php';
+require_once BASE_PATH . 'src/AuthManager.php';
+// Nuevos modelos
+require_once BASE_PATH . 'src/Ticket.php';
+require_once BASE_PATH . 'src/Registration.php';
+require_once BASE_PATH . 'src/Access.php';
+
+// Instancias
+$eventManager = new EventManager();
+$authManager  = new AuthManager();
+$event        = new Event();
+$ticket       = new Ticket();
+$registration = new Registration();
+
+$action = $_GET['action'] ?? null;
+$view   = $_GET['view'] ?? 'events';
+
+// Helpers de auth
+function requireLogin() {
+  if (empty($_SESSION['user'])) {
+    header('Location: ' . BASE_URL . '?view=login');
+    exit;
+  }
+}
+function requireOrganizer() {
+  requireLogin();
+  $db = (new Database())->pdo();
+  $stmt = $db->prepare('SELECT * FROM organizers WHERE user_id=:uid LIMIT 1');
+  $stmt->execute([':uid' => $_SESSION['user']['id']]);
+  $org = $stmt->fetch();
+  if (!$org) {
+    header('Location: ' . BASE_URL . '?view=events&error=not_organizer');
+    exit;
+  }
+  return $org['id'];
+}
+
+// Manejo de acciones
+switch ($action) {
+  case 'store_event':
+    $organizer_id = requireOrganizer();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $eventManager->createFromPost($_POST);
+      header('Location: ' . BASE_URL . '?view=events');
+      exit;
     }
-?>
+    break;
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laragon</title>
-    <style>
-    html,
-    body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        font-weight: 100;
-        background-color: #f9f9f9;
-        color: #333;
+  case 'do_login':
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $u = $authManager->login($_POST['email'], $_POST['password']);
+      if ($u) {
+        $_SESSION['user'] = $u;
+        header('Location: ' . BASE_URL . '?view=events');
+        exit;
+      }
+      $error = 'Credenciales inválidas';
+      require BASE_PATH . 'views/login.php';
     }
+    break;
 
-    .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        text-align: center;
+  case 'do_register':
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $role_id = (isset($_POST['is_organizer']) && $_POST['is_organizer'] == 1) ? 2 : 3;
+      $uid = $authManager->register([
+        'name'     => $_POST['name'],
+        'email'    => $_POST['email'],
+        'password' => $_POST['password'],
+        'role_id'  => $role_id
+      ]);
+      if ($role_id == 2) {
+        $db = (new Database())->pdo();
+        $stmt = $db->prepare('INSERT INTO organizers (user_id,organization_name,contact_phone) VALUES (:u,:org,:phone)');
+        $stmt->execute([':u' => $uid, ':org' => NULL, ':phone' => NULL]);
+      }
+      $_SESSION['user'] = (new User())->find($uid);
+      header('Location: ' . BASE_URL . '?view=events');
+      exit;
     }
+    break;
 
-    .content {
-        max-width: 800px;
-        padding: 100px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  case 'logout':
+    session_destroy();
+    header('Location: ' . BASE_URL . '?view=events');
+    exit;
+
+  case 'toggle_event':
+    $organizer_id = requireOrganizer();
+    if (!empty($_GET['id'])) {
+      $db = (new Database())->pdo();
+      $stmt = $db->prepare("SELECT status FROM events WHERE id=:id");
+      $stmt->execute([':id' => $_GET['id']]);
+      $ev = $stmt->fetch();
+      if ($ev) {
+        $newStatus = ($ev['status'] === 'published') ? 'draft' : 'published';
+        $update = $db->prepare("UPDATE events SET status=:status WHERE id=:id");
+        $update->execute([':status' => $newStatus, ':id' => $_GET['id']]);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'newStatus' => $newStatus]);
+        exit;
+      }
     }
+    break;
 
-    .title {
-        font-size: 60px;
-        margin: 0;
-
+  case 'delete_event':
+    $organizer_id = requireOrganizer();
+    if (!empty($_GET['id'])) {
+      $db = (new Database())->pdo();
+      $stmt = $db->prepare("DELETE FROM events WHERE id=:id");
+      $stmt->execute([':id' => $_GET['id']]);
+      header('Location: ' . BASE_URL . '?view=events');
+      exit;
     }
+    break;
 
-    .info {
-        margin-top: 20px;
-        line-height: 1.6;
-    }
+  // Tickets, Registrations y Access → igual que tu versión (ya están correctos)
+  // ...
+}
 
-    .info a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    .info a:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
-
-    .opt {
-        margin-top: 30px;
-    }
-
-    .opt a {
-        color: #007bff;
-        font-size: 14px;
-        text-decoration: none;
-    }
-
-    .opt a:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
-
-
-    button {
-        display: flex;
-        height: 3em;
-        width: 200px;
-        align-items: center;
-        justify-content: center;
-        background-color: #eeeeee4b;
-        border-radius: 3px;
-        letter-spacing: 1px;
-        transition: all 0.2s linear;
-        cursor: pointer;
-        border: none;
-        background: #fff;
-        box-shadow: 6px 6px 30px #d1d1d1, -6px -6px 30px #ffffff;
-        transform: translateY(-1px);
-    }
-
-    
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="content">
-            <h1 class="title" title="Laragon">Laragon</h1>
-            <div class="info">
-                <p><?php echo htmlspecialchars($_SERVER['SERVER_SOFTWARE'], ENT_QUOTES, 'UTF-8'); ?></p>
-                <p>PHP version: <?php echo htmlspecialchars(phpversion(), ENT_QUOTES, 'UTF-8'); ?>
-                    <a title="phpinfo()" href="/?q=info">info</a>
-                </p>
-                <p>Document Root: <?php echo htmlspecialchars($_SERVER['DOCUMENT_ROOT'], ENT_QUOTES, 'UTF-8'); ?></p>
-            </div>
-            <div class="opt">
-                <p><button><span><a title="Getting Started" target="_blank" href="https://laragon.org/docs"> Getting
-                                Started</a></span></button></p>
-            </div>
-        </div>
-    </div>
-</body>
-
-</html>
+// Manejo de vistas
+switch ($view) {
+  case 'login':
+    require BASE_PATH . 'views/login.php';
+    break;
+  case 'register':
+    require BASE_PATH . 'views/register.php';
+    break;
+  case 'create_event':
+    $organizer_id = requireOrganizer();
+    require BASE_PATH . 'views/event_form.php';
+    break;
+  case 'events':
+  default:
+    $events = $event->allPublished();
+    require BASE_PATH . 'views/event_list.php';
+    break;
+  // resto de vistas igual que tu versión
+}

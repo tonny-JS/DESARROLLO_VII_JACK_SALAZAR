@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS accesses (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  registration_id INT NOT NULL,
+  access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
+);
