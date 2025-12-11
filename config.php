@@ -1,15 +1,7 @@
 <?php
 
-return 
-[
-    'db' => [
-        'host' => 'localhost',
-        'name' => 'evento_db7',
-        'user' => 'root',
-        'pass' => '90335177',
-        'charset' => 'utf8mb4'
-    ],
-    'base_url' => '/DESARROLLO_VII_JACK_SALAZAR/PROYECTO/'
+$config = [
+    "db_dsn"  => "mysql:host=localhost;dbname=proyecto;charset=utf8mb4",
+    "db_user" => "root",
+    "db_pass" => "90335177",
 ];
-
-?>
