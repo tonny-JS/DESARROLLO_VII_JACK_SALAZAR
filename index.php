@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/common.php';
 
 $action = $_GET['action'] ?? null;
@@ -6,6 +10,12 @@ $view   = $_GET['view'] ?? 'home';
 $error  = null;
 
 switch ($action) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
     case 'do_login':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_check($_POST['csrf'] ?? null);
@@ -34,9 +44,16 @@ switch ($action) {
 
             $error = 'Credenciales inválidas';
             include __DIR__ . '/views/login.php';
+            exit;
         }
         break;
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTRO
+    |--------------------------------------------------------------------------
+    */
     case 'do_register':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             csrf_check($_POST['csrf'] ?? null);
@@ -46,26 +63,22 @@ switch ($action) {
             $pass  = $_POST['password'] ?? '';
             $isOrg = isset($_POST['is_organizer']);
 
-            // Validaciones básicas
             if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($pass) < 6) {
                 $error = 'Datos inválidos';
                 include __DIR__ . '/views/register.php';
-                break;
+                exit;
             }
 
-            // Verificar si el email ya existe
             $exists = $db->prepare('SELECT 1 FROM users WHERE email = :e');
             $exists->execute([':e' => $email]);
 
             if ($exists->fetchColumn()) {
                 $error = 'El email ya está registrado';
                 include __DIR__ . '/views/register.php';
-                break;
+                exit;
             }
 
-            // Registrar usuario
             $hash = password_hash($pass, PASSWORD_DEFAULT);
-
             $db->beginTransaction();
 
             $ins = $db->prepare(
@@ -76,7 +89,6 @@ switch ($action) {
 
             $uid = (int)$db->lastInsertId();
 
-            // Si es organizador, insertarlo en tabla organizers
             if ($isOrg) {
                 $org = $db->prepare('INSERT INTO organizers (user_id) VALUES (:uid)');
                 $org->execute([':uid' => $uid]);
@@ -95,9 +107,77 @@ switch ($action) {
         }
         break;
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT
+    |--------------------------------------------------------------------------
+    */
     case 'logout':
         $_SESSION = [];
         session_destroy();
         header('Location: ' . BASE_URL . '/index.php');
         exit;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CANCELAR INSCRIPCIÓN
+    |--------------------------------------------------------------------------
+    */
+    case 'cancel_registration':
+        require_login(); 
+
+        $regId = intval($_GET['id'] ?? 0);
+        $uid   = userId();
+
+        if ($regId <= 0) {
+            echo "ID inválido";
+            exit;
+        }
+
+        // Verificar que pertenece al usuario
+        $stmt = $db->prepare("
+            SELECT id, status 
+            FROM registrations 
+            WHERE id = :id AND user_id = :uid
+            LIMIT 1
+        ");
+        $stmt->execute([':id' => $regId, ':uid' => $uid]);
+        $reg = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reg) {
+            echo "Registro no encontrado o no te pertenece.";
+            exit;
+        }
+
+        if ($reg['status'] === 'cancelled') {
+            header("Location: ".BASE_URL."/index.php?view=my_registrations");
+            exit;
+        }
+
+        // Cancelar
+        $upd = $db->prepare("
+            UPDATE registrations
+            SET status = 'cancelled'
+            WHERE id = :id
+        ");
+        $upd->execute([':id' => $regId]);
+
+        header("Location: ".BASE_URL."/index.php?view=my_registrations");
+        exit;
+}
+
+
+
+// =======================
+//   CARGADOR DE VISTAS
+// =======================
+
+$viewFile = __DIR__ . '/views/' . $view . '.php';
+
+if (file_exists($viewFile)) {
+    include $viewFile;
+} else {
+    echo "<h1>Vista no encontrada: $view</h1>";
 }
