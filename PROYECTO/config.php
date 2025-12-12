@@ -1,15 +1,10 @@
 <?php
-// configuración de la aplicación y la BD.
-// Usa variables de entorno si existen; de lo contrario, valores por defecto.
-return [
-    'db' => [
-        'host' => 'localhost',
-        'name' => 'evento_db7',
-        'user' => 'root',
-        'pass' => '90335177',
-        'charset' => 'utf8mb4'
-    ],
-    'base_url' => '/DESARROLLO_VII_JACK_SALAZAR/PROYECTO/'   // ← AGREGA ESTO
-];
 
-?>
+$config = [
+    "db_dsn"  => "mysql:host=localhost;dbname=evento_db7;charset=utf8mb4",
+    "db_user" => "root",
+    "db_pass" => "90335177",
+
+    // IMPORTANTE: base_url SIEMPRE con http:// y SIN slash final
+    "base_url" => "http://localhost/DESARROLLO_VII_JACK_SALAZAR/PROYECTO"
+];

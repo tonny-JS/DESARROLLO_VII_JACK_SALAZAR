@@ -1,40 +1,48 @@
-<?php 
-// Iniciamos el buffer de salida
-ob_start(); 
-?>
-<div class="register-form">
-    <h2>Registro</h2>
-
-    <?php if (!empty($error)): ?>
-        <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
-    <?php endif; ?>
-
-    <form method="post" action="index.php?action=do_register">
-        <label for="name">Nombre:</label>
-        <input type="text" id="name" name="name" placeholder="Nombre" required><br>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" placeholder="Email" required><br>
-
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" placeholder="Contraseña" required><br>
-
-        <label for="is_organizer">
-            <input type="checkbox" id="is_organizer" name="is_organizer" value="1">
-            Soy organizador
-        </label><br>
-
-        <button class="btn" type="submit">Registrar</button>
-    </form>
-
-    <p>¿Ya tienes cuenta? 
-        <a href="index.php?view=login" class="btn">Inicia sesión</a>
-    </p>
-</div>
 <?php
-// Guardamos el contenido del buffer en la variable $content
-$content = ob_get_clean();
+// Inicia el buffer de salida
+ob_start();
 
-// Incluimos el layout principal
-require 'views/layout.php';
+// Genera token CSRF
+$csrf = generate_csrf();
 ?>
+
+<h3>Registro</h3>
+
+<?php if (!empty($error)): ?>
+    <p style="color:#b00"><?= e($error) ?></p>
+<?php endif; ?>
+
+<form method="post" action="<?= e(BASE_URL) ?>/index.php?action=do_register">
+    <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+
+    <label>
+        Nombre:<br>
+        <input type="text" name="name" required>
+    </label><br>
+
+    <label>
+        Email:<br>
+        <input type="email" name="email" required>
+    </label><br>
+
+    <label>
+        Contraseña:<br>
+        <input type="password" name="password" required minlength="6">
+    </label><br>
+
+    <label>
+        <input type="checkbox" name="is_organizer" value="1"> Soy organizador
+    </label><br>
+
+    <button type="submit">Registrar</button>
+</form>
+
+<p>
+    ¿Ya tienes cuenta? 
+    <a href="<?= e(BASE_URL) ?>/index.php?view=login">Inicia sesión</a>
+</p>
+
+<?php
+// Captura el contenido y lo pasa al layout
+$content = ob_get_clean();
+require __DIR__ . '/layout.php';
