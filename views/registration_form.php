@@ -102,7 +102,7 @@ ob_start();
 
 <?php if (!$event): ?>
   <p class="danger">Evento no encontrado o no publicado.</p>
-  <p><a href="<?= e(BASE_URL) ?>/index.php?view=events">⬅️ Volver</a></p>
+  <p><a href="<?= e(BASE_URL) ?>/index.php?view=events"> Volver</a></p>
 <?php else: ?>
 
   <?php if (!empty($error)): ?>
@@ -111,12 +111,12 @@ ob_start();
 
   <?php if ($isOrganizerOfEvent): ?>
     <p>No puedes inscribirte a un evento que organizas.</p>
-    <p><a href="<?= e(BASE_URL) ?>/index.php?view=events">⬅️ Volver</a></p>
+    <p><a href="<?= e(BASE_URL) ?>/index.php?view=events"> Volver</a></p>
   <?php else: ?>
 
     <?php if (empty($tickets)): ?>
       <p>No hay tickets disponibles para este evento.</p>
-      <p><a href="<?= e(BASE_URL) ?>/index.php?view=events">⬅️ Volver</a></p>
+      <p><a href="<?= e(BASE_URL) ?>/index.php?view=events"> Volver</a></p>
     <?php else: ?>
 
       <form action="<?= e(BASE_URL) ?>/index.php?view=registration_form&event_id=<?= intval($eventId) ?>" method="post">
@@ -140,7 +140,7 @@ ob_start();
         <button type="submit">Comprar / Reservar</button>
       </form>
 
-      <p><a href="<?= e(BASE_URL) ?>/index.php?view=events">⬅️ Volver</a></p>
+      <p><a href="<?= e(BASE_URL) ?>/index.php?view=events">Volver</a></p>
 
     <?php endif; // tickets exist ?>
 
