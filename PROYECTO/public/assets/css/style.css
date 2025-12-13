@@ -1,25 +1,9 @@
+
 /* ==============================
    RESET Y BASE
 ================================ */
 * {
   box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: #f4f6fb;
-  color: #1f2937;
-  line-height: 1.5;
-}
-
-a {
-  color: #2563eb;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
 }
 
 /* ==============================
@@ -53,7 +37,6 @@ nav .right {
   margin-left: auto;
   font-size: 0.9rem;
 }
-
 /* ==============================
    MAIN
 ================================ */
@@ -88,7 +71,6 @@ p.danger {
   padding: 10px;
   border-radius: 6px;
 }
-
 /* ==============================
    FORMULARIOS
 ================================ */
@@ -137,7 +119,6 @@ button {
 button:hover {
   background: #1d4ed8;
 }
-
 /* ==============================
    EVENTOS (cards)
 ================================ */

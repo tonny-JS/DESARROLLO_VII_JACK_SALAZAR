@@ -1,0 +1,40 @@
+[
+    {
+        "tipo": "Gerente",
+        "nombre": "Ana G\u00f3mez",
+        "id": 1,
+        "salarioBase": 2500,
+        "departamento": "Ventas",
+        "bono": 375
+    },
+    {
+        "tipo": "Gerente",
+        "nombre": "Carlos Ruiz",
+        "id": 2,
+        "salarioBase": 2700,
+        "departamento": "Operaciones",
+        "bono": 0
+    },
+    {
+        "tipo": "Desarrollador",
+        "nombre": "Laura P\u00e9rez",
+        "id": 10,
+        "salarioBase": 1650.0000000000002,
+        "lenguaje": "PHP",
+        "nivel": "senior"
+    },
+    {
+        "tipo": "Desarrollador",
+        "nombre": "Miguel Torres",
+        "id": 11,
+        "salarioBase": 1200,
+        "lenguaje": "JavaScript",
+        "nivel": "mid"
+    },
+    {
+        "tipo": "Empleado",
+        "nombre": "Empleado Base",
+        "id": 50,
+        "salarioBase": 800
+    }
+]
