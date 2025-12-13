@@ -10,25 +10,7 @@ $orgFlag = $user ? is_organizer($db, (int)$user['id']) : false;
     <meta charset="UTF-8">
     <title>Plataforma de Eventos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: system-ui, sans-serif;
-            margin: 0;
-        }
-        header, footer {
-            background: #f5f5f5;
-            padding: 10px 16px;
-        }
-        nav a {
-            margin-right: 12px;
-        }
-        main {
-            padding: 16px;
-        }
-        .right {
-            float: right;
-        }
-    </style>
+    <link rel="stylesheet" href="<?= e(BASE_URL) ?>public/assets/css/style.css">
 </head>
 <body>
     <header>
