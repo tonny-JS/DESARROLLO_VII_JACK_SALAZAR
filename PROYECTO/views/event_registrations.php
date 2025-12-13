@@ -103,7 +103,7 @@ ob_start();
     </table>
 <?php endif; ?>
 
-<p><a href="<?= BASE_URL ?>/index.php?view=organizer_dashboard">⬅ Volver al panel</a></p>
+<p><a href="<?= BASE_URL ?>/index.php?view=organizer_dashboard">Volver al panel</a></p>
 
 <?php
 $content = ob_get_clean();

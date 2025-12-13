@@ -71,7 +71,7 @@ ob_start();
 
 <h2>Editar ticket</h2>
 
-<a href="<?= e(BASE_URL) ?>/index.php?view=tickets&event_id=<?= $eventId ?>">⬅ Volver</a>
+<a href="<?= e(BASE_URL) ?>/index.php?view=tickets&event_id=<?= $eventId ?>">Volver</a>
 
 <?php if (!empty($error)): ?>
     <p style="color:red;"><?= e($error) ?></p>

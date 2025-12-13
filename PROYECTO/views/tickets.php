@@ -69,7 +69,7 @@ ob_start();
 ?>
 <h2>Tickets del evento: <?= e($event['title']) ?></h2>
 
-<a href="<?= e(BASE_URL) ?>/index.php?view=organizer_dashboard">⬅ Volver al panel</a>
+<a href="<?= e(BASE_URL) ?>/index.php?view=organizer_dashboard">Volver al panel</a>
 
 <?php if (!empty($error)): ?>
     <p style="color:red;"><?= e($error) ?></p>

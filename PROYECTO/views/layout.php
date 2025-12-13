@@ -10,7 +10,7 @@ $orgFlag = $user ? is_organizer($db, (int)$user['id']) : false;
     <meta charset="UTF-8">
     <title>Plataforma de Eventos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= e(BASE_URL) ?>public/assets/css/style.css">
+    <link rel="stylesheet" href="<?= e(BASE_URL) ?>/public/assets/css/style.css">
 </head>
 <body>
     <header>
@@ -27,7 +27,7 @@ $orgFlag = $user ? is_organizer($db, (int)$user['id']) : false;
                 <?php endif; ?>
 
                 <span class="right">
-                    Bienvenido, <?= e($user['name'] ?? $user['email']) ?> |
+                    Bienvenido, <?= e($user['name'] ?? $user['email']) ?> 
                     <a href="<?= e(BASE_URL) ?>/index.php?action=logout">Salir</a>
                 </span>
             <?php else: ?>
